@@ -6,14 +6,15 @@ const { json } = require('express')
 
 const createTask = async(req, res) => {
     const {task_title, status} = req.body
+
     if(!task_title || !status) {
-        return res.status(401).json('All fields must be filled')
+        return res.status(403).json({error:'All fields must be filled'})
     }
 
     try {
             const task = await Todo.create({task_title, status})
             if(!task) {
-                return res.status(401).json('Operation not completed')
+                return res.status(400).json({error: 'Operation not completed'})
     }
 
         return res.status(200).json({
@@ -34,7 +35,7 @@ const getSingleTask = async(req, res) => {
     const idverifier = mongoose.Types.ObjectId.isValid(id)
     
     if(!idverifier) {
-      return res.status(401).json( {error: 'Invalid id supplied !!!!!!!!!'} )
+      return res.status(403).json( {error: 'Invalid id supplied !!!!!!!!!'} )
     
     }
    
@@ -55,9 +56,33 @@ const getSingleTask = async(req, res) => {
     }
 }
 
+const getAllTask = async(req, res) => {
+    try {
+
+        const tasks = await Todo.find().select('-__v') //.select() here is used to prevent the version key (__v) field from being a returning filed
+        if (!tasks) {
+            return res.status(404).json({error: 'You currently have no task ..............'})
+            
+        }
+
+        res.status(200).json({
+            status: 'Search Succesful !!!!!!!!!!!!!',
+            tasks
+        })
+    } catch (error) {
+
+        res.status(500).json({
+            message: 'Failed!!!!!!!!!!!!!!!!',
+            error: error.message
+        })   
+    }
+
+}
+
 module.exports = {
     createTask,
     getSingleTask,
+    getAllTask
   
    
 }
