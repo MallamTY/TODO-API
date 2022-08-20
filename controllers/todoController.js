@@ -34,7 +34,7 @@ const getSingleTask = async(req, res) => {
     const idverifier = mongoose.Types.ObjectId.isValid(id)
     
     if(!idverifier) {
-      return res.status(401).json( {error: 'Invalid id supplied !!!!!!!!!'})
+      return res.status(401).json( {error: 'Invalid id supplied !!!!!!!!!'} )
     
     }
    
@@ -58,10 +58,6 @@ const getSingleTask = async(req, res) => {
 module.exports = {
     createTask,
     getSingleTask,
-    // getAllTask,
-    // getUncompletedTask,
-    // getCompletedTask,
-    // updateTask,
-    // deleteTas
+  
    
 }
