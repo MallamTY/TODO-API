@@ -74,15 +74,65 @@ const getAllTask = async(req, res) => {
         res.status(500).json({
             message: 'Failed!!!!!!!!!!!!!!!!',
             error: error.message
-        })   
+        })
     }
 
 }
 
+
+const getUncompletedTask = async(req, res) => {
+    
+    const status = req.body.status
+   
+    try {
+        
+        const tasks = await Todo.find({status}).select('-__v')
+        if (!tasks) {
+            return  res.status(404).json({error: 'Task no found !!!!!!!!!!!!!!'})
+        }
+
+        res.status(200).json({
+            status: 'Search Succesful !!!!!!!!!!!!!',
+            tasks
+        })
+
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
+}
+
+
+const getCompletedTask = async(req, res) => {
+    
+    const status = req.body.status
+   
+    try {
+        
+        const tasks = await Todo.find({status}).select('-__v')
+        if (!tasks) {
+            return  res.status(404).json({error: 'Task no found !!!!!!!!!!!!!!'})
+        }
+
+        res.status(200).json({
+            status: 'Search Succesful !!!!!!!!!!!!!',
+            tasks
+        })
+
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
+}
+
+
+
+
 module.exports = {
     createTask,
     getSingleTask,
-    getAllTask
+    getAllTask,
+    getUncompletedTask,
+    getCompletedTask
+    
   
    
 }
