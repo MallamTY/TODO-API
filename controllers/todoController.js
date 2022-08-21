@@ -153,18 +153,23 @@ const updateTask = async(req, res) => {
     if(!idverifier) {
         return res.status(403).json( {error: 'Invalid id supplied !!!!!!!!!'} )
     }
-
-    const task = await Todo.findByIdAndUpdate({_id:id}, {task_title, status}, {new: true, runValidators: true})
+    try {
+        const task = await Todo.findByIdAndUpdate({_id:id}, {task_title, status}, {new: true, runValidators: true})
     
-    if(!task) {
-      
-        return res.status(403).json({error: 'Unable to update data due to internal error'})
+        if(!task) {
+          
+            return res.status(403).json({error: 'Unable to update data due to internal error'})
+        }
+    
+        res.status(200).json({
+            status: 'Data successfully updated .......................',
+            task
+        }) 
+    } catch (error) {
+        res.status(500).json({
+            error: error.message
+        })
     }
-
-    res.status(200).json({
-        status: 'Data successfully updated .......................',
-        task
-    }) 
     
 }
 

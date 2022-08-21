@@ -24,7 +24,7 @@ const userSchema = new schema({
         maxlength: [50, `First Name can't be more than 50 characters`],
         trim: true,
         required: true,
-        unique: true
+        unique:true
 
     },
 
@@ -32,8 +32,7 @@ const userSchema = new schema({
         type: String,
         maxlength: [50, `Email can't be more than 50 characters`],
         trim: true,
-        required: true,
-        unique: true
+        required: true
     },
 
     password: {

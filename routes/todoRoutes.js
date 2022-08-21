@@ -8,8 +8,11 @@ const { createTask,
         deleteTask,
         updateTask
         } = require('../controllers/todoController')
+const userAuthentication = require('../middleware/userAuthentication')
 
 const router = express.Router()
+
+router.use(userAuthentication)
 
 
 router.post('/add-task', createTask)
