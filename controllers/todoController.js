@@ -154,7 +154,7 @@ const updateTask = async(req, res) => {
         return res.status(403).json( {error: 'Invalid id supplied !!!!!!!!!'} )
     }
 
-    const task = await Todo.findByIdAndUpdate({_id:id}, {task_title, status})
+    const task = await Todo.findByIdAndUpdate({_id:id}, {task_title, status}, {new: true, runValidators: true})
     
     if(!task) {
       
