@@ -3,6 +3,7 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const taskRoutes = require('./routes/todoRoutes')
+const userRoutes = require('./routes/userRoute')
 const {PORT, MONGO_URI} = require('./configuration/configuration')
 
 
@@ -15,7 +16,10 @@ app.use(morgan('common'))
 app.use(express.json())
 
 
+
 app.use('/api/todo', taskRoutes)
+
+app.use('/api/user', userRoutes)
 
 
 
