@@ -123,6 +123,51 @@ const getCompletedTask = async(req, res) => {
     }
 }
 
+const deleteTask = async(req, res) => {
+    const {id} = req.params
+
+    const idverifier = mongoose.Types.ObjectId.isValid(id)
+
+    if(!idverifier) {
+        return res.status(403).json( {error: 'Invalid id supplied !!!!!!!!!'} )
+    }
+
+    const task = await Todo.findOneAndDelete({_id: id})
+    console.log(task);
+
+    if (!task) {
+        return res.status(403).json( {error: 'Data Not Found !!!!!!!!!'} )
+    }
+
+    res.status(200).json({
+        status: 'Succesful deleted .....................',
+        task
+    })  
+}
+
+const updateTask = async(req, res) => {
+    const {id} = req.params
+    const {task_title, status} = req.body
+    const idverifier = mongoose.Types.ObjectId.isValid(id)
+
+    if(!idverifier) {
+        return res.status(403).json( {error: 'Invalid id supplied !!!!!!!!!'} )
+    }
+
+    const task = await Todo.findByIdAndUpdate({_id:id}, {task_title, status})
+    
+    if(!task) {
+      
+        return res.status(403).json({error: 'Unable to update data due to internal error'})
+    }
+
+    res.status(200).json({
+        status: 'Data successfully updated .......................',
+        task
+    }) 
+    
+}
+
 
 
 
@@ -131,8 +176,11 @@ module.exports = {
     getSingleTask,
     getAllTask,
     getUncompletedTask,
-    getCompletedTask
+    getCompletedTask,
+    deleteTask,
+    updateTask  
     
   
    
 }
+

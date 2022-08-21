@@ -4,7 +4,9 @@ const { createTask,
         getSingleTask,
         getAllTask,
         getUncompletedTask,
-        getCompletedTask
+        getCompletedTask,
+        deleteTask,
+        updateTask
         } = require('../controllers/todoController')
 
 const router = express.Router()
@@ -12,7 +14,7 @@ const router = express.Router()
 
 router.post('/add-task', createTask)
 
-router.route('/:id').get(getSingleTask)
+router.route('/:id').get(getSingleTask).delete(deleteTask).patch(updateTask)
 router.route('/').get(getAllTask)
 router.get('/find/uncompleted', getUncompletedTask)
 router.get('/find/completed', getCompletedTask)

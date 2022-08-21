@@ -11,7 +11,8 @@ const todoSchema = new schema({
     },
     status: {
         type: String,
-        default: false
+        default: false,
+        trim:true
     }
 }, {timestamps: true})
 
