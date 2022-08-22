@@ -5,6 +5,7 @@ const { json } = require('express')
 
 
 const createTask = async(req, res) => {
+    const user_id = req.user._id
     const {task_title, status} = req.body
 
     if(!task_title || !status) {
@@ -12,7 +13,7 @@ const createTask = async(req, res) => {
     }
 
     try {
-            const task = await Todo.create({task_title, status})
+            const task = await Todo.create({task_title, status, user_id})
             if(!task) {
                 return res.status(400).json({error: 'Operation not completed'})
     }
@@ -57,9 +58,11 @@ const getSingleTask = async(req, res) => {
 }
 
 const getAllTask = async(req, res) => {
-    try {
+    const user_id = req.user._id
 
-        const tasks = await Todo.find().select('-__v') //.select() here is used to prevent the version key (__v) field from being a returning filed
+    try {
+        const tasks = await Todo.find({user_id}).select('-__v') 
+        console.log(tasks);//.select() here is used to prevent the version key (__v) field from being a returning filed
         if (!tasks) {
             return res.status(404).json({error: 'You currently have no task ..............'})
             
@@ -133,7 +136,6 @@ const deleteTask = async(req, res) => {
     }
 
     const task = await Todo.findOneAndDelete({_id: id})
-    console.log(task);
 
     if (!task) {
         return res.status(403).json( {error: 'Data Not Found !!!!!!!!!'} )

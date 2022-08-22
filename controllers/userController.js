@@ -73,7 +73,7 @@ const userLogin = async (req, res) => {
         return res.status(401).json('Username or Password not match !!!!!!!!!!')
     }
 
-    const token = createToken(user._id)
+    const token = createToken(user._id, user.task_title)
     res.status(200).json({status:'Log in successful........',
                                 username, token})
     

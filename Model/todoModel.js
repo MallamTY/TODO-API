@@ -13,6 +13,11 @@ const todoSchema = new schema({
         type: String,
         default: false,
         trim:true
+    },
+
+    user_id: {
+        type: String,
+        required: true
     }
 }, {timestamps: true})
 
