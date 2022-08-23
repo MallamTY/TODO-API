@@ -27,7 +27,14 @@ const userSchema = new schema({
         unique:true
 
     },
+    phone: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
 
+    
     email: {
         type: String,
         maxlength: [50, `Email can't be more than 50 characters`],
@@ -47,7 +54,18 @@ const userSchema = new schema({
         minlength: [8, `Confirm password can not be less than 8 characters`],
         required: true,
         
+    },
+
+    isAuthenticated: {
+        type: Boolean,
+        default: false
+    },
+
+    phoneOTP: {
+        type: String,
+        default: ""
     }
+
 }, {timeseries: true})
 
 

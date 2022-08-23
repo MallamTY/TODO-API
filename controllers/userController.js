@@ -1,13 +1,15 @@
 const User = require('../Model/userModel')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
+const { generateOTP } = require('../accessories/otpGenerator')
+const { findById } = require('../Model/userModel')
 const { createToken } = require('../accessories/tokenGenerator')
 
 
 const userSignup = async (req, res) => {
     //firstname, lastname,  username, !username || !firstname || !lastname || firstname, lastname, username,
-    const {firstname, lastname, username, email,password, confirmpassword} = req.body
-    if (!firstname, !lastname, !username, !email ||  !password || !confirmpassword) {
+    const {firstname, lastname, username, email,password, confirmpassword, phone} = req.body
+    if (!firstname, !lastname, !username, !email ||  !password || !confirmpassword || !phone) {
         return res.status(401).json('All field must be filled')
     }
 
@@ -35,7 +37,7 @@ const userSignup = async (req, res) => {
         const hashedconfirmPassword = await bcrypt.hash(confirmpassword, salt)
     
          const registeredUser = await User.create({firstname, lastname, username, 
-                                                email, password: hashedPassword, 
+                                                email, phone, password: hashedPassword, 
                                                 confirmpassword: hashedconfirmPassword})
     
         if(!registeredUser) {
@@ -73,9 +75,17 @@ const userLogin = async (req, res) => {
         return res.status(401).json('Username or Password not match !!!!!!!!!!')
     }
 
-    const token = createToken(user._id)
+    const otp = generateOTP(6);
+    user.phoneOTP = otp;
+    user.isAuthenticated= true
+
+    console.log(`\n Your one time password is ${otp} \n`);
+    await user.save()
+    //const token = createToken(user._id)
     res.status(200).json({status:'Log in successful........',
-                                username, token})
+                                username, 
+                                userid: user._id
+                            })
     
     } catch (error) {
         res.status(500).json({
@@ -86,10 +96,54 @@ const userLogin = async (req, res) => {
     
 }
 
+const verifyOTP = async(req, res, next) => {
+    
+
+    try {
+        const {OTP, userid} = req.body;
+
+        const user = await User.findById(userid)
+        if (!user) {
+           return next(res.status(400).json({
+                message: `User Not Found !!!!!!`
+            }))
+        }
+
+        if (OTP !== user.phoneOTP) {
+            return next(res.status(400).json({
+                message: `Incorrect OTP !!!!!!`
+            }))
+        }
+
+        user.phoneOTP = ''
+        user.isAuthenticated = false
+        const token = createToken(user._id)
+
+        await user.save()
+
+        res.status(200).json({    
+            status: "Success",
+              message: "OTP Accepted !!!!!!!!!!!!!!",
+              data: {
+                userId: user._id,
+                token: token
+                
+              }
+            })
+
+        next()
+    } catch (error) {
+        next(res.status(500).json({
+            error: error.message
+        }))
+    }
+}
+
 
 
 
 module.exports = {
     userSignup,
-    userLogin
+    userLogin, 
+    verifyOTP
 }

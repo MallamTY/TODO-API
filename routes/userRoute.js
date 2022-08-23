@@ -1,9 +1,11 @@
 const express = require('express')
-const { userLogin, userSignup } = require('../controllers/userController')
+const { userLogin, userSignup, verifyOTP } = require('../controllers/userController')
 const router = express.Router()
 
 
 router.post('/login', userLogin)
+
+router.post('/verifyOTP', verifyOTP)
 
 router.post('/signup', userSignup)
 

@@ -11,7 +11,7 @@ const todoSchema = new schema({
     },
     status: {
         type: String,
-        default: false,
+        default: 'Uncompleted',
         trim:true
     },
 

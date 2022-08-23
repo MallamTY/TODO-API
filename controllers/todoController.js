@@ -3,12 +3,11 @@ const Todo = require('../Model/todoModel')
 const mongoose = require('mongoose')
 const { json } = require('express')
 
-
 const createTask = async(req, res) => {
     const user_id = req.user._id
     const {task_title, status} = req.body
 
-    if(!task_title || !status) {
+    if(!task_title) {
         return res.status(403).json({error:'All fields must be filled'})
     }
 
@@ -67,7 +66,7 @@ const getSingleTask = async(req, res) => {
 }
 
 const getAllTask = async(req, res) => {
-    const user_id = req.user._id
+    const user_id = req.user.id
 
     try {
         const tasks = await Todo.find({user_id}).select('-__v') 
@@ -93,22 +92,34 @@ const getAllTask = async(req, res) => {
 
 
 const getUncompletedTask = async(req, res) => {
-    
-    const status = req.body.status
+    const user_id = req.user.id
+    const {status} = req.body
    
     try {
         
-        const tasks = await Todo.find({status}).select('-__v')
-        if (!tasks) {
-            return  res.status(404).json({error: 'Task no found !!!!!!!!!!!!!!'})
-        }
+        if(status === 'Uncompleted') {
+            const tasks = await Todo.find({status, user_id}).select('-__v')
+            if(tasks) {
 
-        res.status(200).json({
-            status: 'Search Succesful !!!!!!!!!!!!!',
-            tasks
-        })
+                if(tasks.length > 0){
+                    res.status(200).json({
+                        status: 'Search Succesful !!!!!!!!!!!!!',
+                        tasks
+                    })
+                }
+                return  res.status(404).json({error: 'Task no found !!!!!!!!!!!!!!'})
+            }
+            
+            if (!tasks) {
+                return res.status(403).json({error: `You don't have access to this file`})
+            }
+            }
 
-    } catch (error) {
+        return res.status(404).json({error: `Bad request !!!!!!!!!`})
+         
+    }
+
+     catch (error) {
         res.status(500).json({error: error.message})
     }
 }
@@ -116,21 +127,31 @@ const getUncompletedTask = async(req, res) => {
 
 const getCompletedTask = async(req, res) => {
     
-    const status = req.body.status
+    const user_id = req.user.id
+    const {status} = req.body
    
     try {
+        if (status === 'Completed') {
+            const tasks = await Todo.find({status, user_id}).select('-__v')
+            if(tasks) {
+    
+                if(tasks.length > 0){
+                 return res.status(200).json({
+                        status: 'Search Succesful !!!!!!!!!!!!!',
+                        tasks
+                    })
+                }
+                return  res.status(404).json({error: 'Task no found !!!!!!!!!!!!!!'})
+            }
+            
+            if (!tasks) {
+               return res.status(403).json({error: `You don't have access to this file`})
+            }  
+        } return res.status(404).json({error: `Bad request !!!!!!!!!`})
         
-        const tasks = await Todo.find({status}).select('-__v')
-        if (!tasks) {
-            return  res.status(404).json({error: 'Task no found !!!!!!!!!!!!!!'})
-        }
-
-        res.status(200).json({
-            status: 'Search Succesful !!!!!!!!!!!!!',
-            tasks
-        })
-
-    } catch (error) {
+         
+    }
+     catch (error) {
         res.status(500).json({error: error.message})
     }
 }
