@@ -11,6 +11,7 @@ const userAuthentication = async(req, res, next) => {
         return res.status(401).json('Authorization token required !!!!!!!!!!')
     }
 
+        //Spliting the header request holding the token
     const token = authorization.split(' ')[1]
     
     if(!token) {

@@ -59,6 +59,11 @@ const userSchema = new schema({
     isAuthenticated: {
         type: Boolean,
         default: false
+    },
+
+    phoneOTP: {
+        type: String,
+        default: ""
     }
 
 }, {timeseries: true})
