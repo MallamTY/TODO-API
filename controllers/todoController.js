@@ -32,8 +32,10 @@ const createTask = async(req, res) => {
 } 
 
 const getSingleTask = async(req, res) => {
+    const user_id = req.user.id
     const {id} = req.params
     const idverifier = mongoose.Types.ObjectId.isValid(id)
+    console.log(user_id);
     
     if(!idverifier) {
       return res.status(403).json( {error: 'Invalid id supplied !!!!!!!!!'} )
@@ -43,16 +45,23 @@ const getSingleTask = async(req, res) => {
     try {
         
         const task = await Todo.findById(id)
+
         if (!task) {
             return  res.status(404).json({error: 'Task no found !!!!!!!!!!!!!!'})
         }
+        
+        if (task.user_id === user_id) {
+            return res.status(200).json({
+                status: 'Search Succesful !!!!!!!!!!!!!',
+                task
+              })
+          }
+          
+          return res.status(403).json({error: `You do not have access to this file`})
+        }
+         
 
-        res.status(200).json({
-            status: 'Search Succesful !!!!!!!!!!!!!',
-            task
-        })
-
-    } catch (error) {
+     catch (error) {
         res.status(500).json({error: error.message})
     }
 }
