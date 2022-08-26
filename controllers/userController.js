@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt')
 const { generateOTP } = require('../accessories/otpGenerator')
 const { findById } = require('../Model/userModel')
 const { createToken } = require('../accessories/tokenGenerator')
+const { sendOTP } = require('../accessories/otpSender')
 
 
 const userSignup = async (req, res) => {
@@ -76,13 +77,13 @@ const userLogin = async (req, res) => {
     }
 
     const otp = generateOTP(6);
+    sendOTP(user.phone, tp)
     user.phoneOTP = otp;
     user.isAuthenticated= true
 
-    console.log(`\n Your one time password is ${otp} \n`);
     await user.save()
     //const token = createToken(user._id)
-    res.status(200).json({status:'Log in successful........',
+    res.status(200).json({Message:'Your one time password has been sent to your mobile number........',
                                 username, 
                                 userid: user._id
                             })
