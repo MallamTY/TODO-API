@@ -1,10 +1,10 @@
 const User = require('../Model/userModel')
+const OTP = require('../Model/otpModel')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
-const { generateOTP } = require('../accessories/otpGenerator')
-const { findById } = require('../Model/userModel')
+const { generateOTP, addToTime } = require('../accessories/otpGenerator')
 const { createToken } = require('../accessories/tokenGenerator')
-const { sendOTP } = require('../accessories/otpSender')
+//const { sendOTP } = require('../accessories/otpSender')
 
 
 const userSignup = async (req, res) => {
@@ -65,7 +65,6 @@ const userLogin = async (req, res) => {
     }
     try {
         const user = await User.findOne({ $or: [ { username }, { email } ] })
-        console.log(user);
 
     if(!user) {
         return res.status(401).json('Username or Password not match !!!!!!!!!!')
@@ -76,12 +75,12 @@ const userLogin = async (req, res) => {
     if(!match){
         return res.status(401).json('Username or Password not match !!!!!!!!!!')
     }
-
-    const otp = generateOTP(6);
-    sendOTP(user.phone, otp)
-    user.phoneOTP = otp;
-    user.isAuthenticated= true
-    console.log(`Your one time password is ${otp}`);
+   
+    const genOTP = generateOTP(6);
+    const currentTime = new Date();
+    const expireAt = addToTime(currentTime,1);
+    const otp = await OTP.create({phoneOTP: genOTP, expireAt})
+    //console.log(otp);
     await user.save()
     //const token = createToken(user._id)
     res.status(200).json({Message:'Your one time password has been sent to your mobile number........',

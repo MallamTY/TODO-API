@@ -7,3 +7,7 @@ exports.generateOTP = (lengthOTP) => {
     return OTP;
     
 };
+
+exports.addToTime = (date, minutes) => {
+    return new Date(date.getTime() + minutes*60000);    
+}

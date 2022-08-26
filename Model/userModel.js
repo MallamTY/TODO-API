@@ -66,7 +66,10 @@ const userSchema = new schema({
         default: ""
     }
 
-}, {timeseries: true})
-
+}, {timestamps: true}
+)
+// userSchema.index({createdAt: 1},{expireAfterSeconds: 20})
+// createdAt: { type: Date, expires: 20, default: Date.now }
+// }
 
 module.exports = mongoose.model('User', userSchema)
