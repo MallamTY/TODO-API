@@ -77,7 +77,7 @@ const userLogin = async (req, res) => {
     }
 
     const otp = generateOTP(6);
-    sendOTP(user.phone, tp)
+    sendOTP(user.phone, otp)
     user.phoneOTP = otp;
     user.isAuthenticated= true
 
