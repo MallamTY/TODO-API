@@ -2,7 +2,7 @@ const User = require('../Model/userModel')
 const OTP = require('../Model/otpModel')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
-const { generateOTP, addToTime } = require('../accessories/otpGenerator')
+const generateOTP  = require('../accessories/otpGenerator')
 const { createToken } = require('../accessories/tokenGenerator')
 //const { sendOTP } = require('../accessories/otpSender')
 
@@ -52,7 +52,6 @@ const userSignup = async (req, res) => {
     } catch (error) {
         res.status(500).json('Internal error encountered, please try again later !!!!!!!!!!')
     }
-
         
 
 }
@@ -73,12 +72,12 @@ const userLogin = async (req, res) => {
     const match = await bcrypt.compare(password, user.password)
 
     if(!match){
+
         return res.status(401).json('Username or Password not match !!!!!!!!!!')
     }
-   
     const genOTP = generateOTP(6);
-    const currentTime = new Date();
-    const expireAt = addToTime(currentTime,1);
+
+    
     const otp = await OTP.create({phoneOTP: genOTP, expireAt})
     //console.log(otp);
     await user.save()
@@ -98,9 +97,9 @@ const userLogin = async (req, res) => {
 }
 
 const verifyOTP = async(req, res, next) => {
-    
 
     try {
+        var currentdate = new Date();
         const {OTP, userid} = req.body;
 
         const user = await User.findById(userid)
@@ -110,17 +109,43 @@ const verifyOTP = async(req, res, next) => {
             }))
         }
 
-        if (OTP !== user.phoneOTP) {
-            return next(res.status(400).json({
-                message: `Incorrect OTP !!!!!!`
-            }))
+
+        var dates = {
+            convert:function(expireAt) {
+              
+                return (
+                    expireAt.constructor === Date ? expireAt :
+                    expireAt.constructor === Array ? new Date(expireAt[0],expireAt[1],expireAt[2]) :
+                    expireAt.constructor === Number ? new Date(expireAt) :
+                    expireAt.constructor === String ? new Date(expireAt) :
+                    typeof expireAt === "object" ? new Date(expireAt.year,expireAt.month,expireAt.date) :
+                    NaN
+                );
+            },
+            compare:function(expireAt,currentTime) {
+        
+                return (
+                    isFinite(expireAt=this.convert(expireAt).valueOf()) &&
+                    isFinite(currentTime=this.convert(currentTime).valueOf()) ?
+                    (expireAt>currentTime)-(expireAt<currentTime) :
+                    NaN
+                );
+            }
+       
         }
+    
+        const dbOTP = await OTP.findOne({_id: user.id})
+        // if (OTP !== user.phoneOTP) {
+        //     return next(res.status(400).json({
+        //         message: `Incorrect OTP !!!!!!`
+        //     }))
+        // }
 
-        user.phoneOTP = ''
-        user.isAuthenticated = false
-        const token = createToken(user._id)
+        // user.phoneOTP = ''
+        // user.isAuthenticated = false
+        // const token = createToken(user._id)
 
-        await user.save()
+        // await user.save()
 
         res.status(200).json({    
             status: "Success",
