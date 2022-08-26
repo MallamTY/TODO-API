@@ -7,7 +7,7 @@ exports.sendOTP = (userPhoneNumber, otp) => {
     "message_type" : "ALPHANUMERIC",
     "to" : userPhoneNumber,
     "from" : "MallamTY",
-    "channel" : "generic",
+    "channel" : "WhatsApp",
     "pin_attempts" : 5,
     "pin_time_to_live" : 20,
     "pin_length" : 6,
@@ -16,19 +16,19 @@ exports.sendOTP = (userPhoneNumber, otp) => {
     "pin_type" : "NUMERIC"
     };
 
-     var options = {
-     'method': 'POST',
-     'url': 'https://api.ng.termii.com/api/sms/otp/send',
-     'headers': {
-     'Content-Type': ['application/json', 'application/json']
-     },
-     body: JSON.stringify(data)
+    //  var options = {
+    //  'method': 'POST',
+    //  'url': 'https://api.ng.termii.com/api/sms/otp/send',
+    //  'headers': {
+    //  'Content-Type': ['application/json', 'application/json']
+    //  },
+    //  body: JSON.stringify(data)
    
-     };
+    //  };
    
-     request(options, function (error, response) {
-          if (error) throw new Error(error);
-          console.log(response.body);
+    //  request(options, function (error, response) {
+    //       if (error) throw new Error(error);
+    //       console.log(response.body);
    
-      })  
+    //   })  
 }

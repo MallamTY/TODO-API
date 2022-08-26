@@ -59,12 +59,13 @@ const userSignup = async (req, res) => {
     
 
 const userLogin = async (req, res) => {
-    const {username, password} = req.body
-    if (!username || !password) {
+    const {username, password, email} = req.body
+    if (!(email || username) || !password) {
         return res.status(401).json('All fields are required !!!!!!!!!')
     }
     try {
-        const user = await User.findOne({username})
+        const user = await User.findOne({ $or: [ { username }, { email } ] })
+        console.log(user);
 
     if(!user) {
         return res.status(401).json('Username or Password not match !!!!!!!!!!')
@@ -80,7 +81,7 @@ const userLogin = async (req, res) => {
     sendOTP(user.phone, otp)
     user.phoneOTP = otp;
     user.isAuthenticated= true
-
+    console.log(`Your one time password is ${otp}`);
     await user.save()
     //const token = createToken(user._id)
     res.status(200).json({Message:'Your one time password has been sent to your mobile number........',
