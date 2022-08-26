@@ -1,9 +1,11 @@
 const User = require('../Model/userModel')
-const OTP = require('../Model/otpModel')
+//const OTP = require('../Model/otpModel')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
-const generateOTP  = require('../accessories/otpGenerator')
+const {generateOTP}  = require('../accessories/otpGenerator')
 const { createToken } = require('../accessories/tokenGenerator')
+const otpModel = require('../Model/otpModel')
+//const otpModel = require('../Model/otpModel')
 //const { sendOTP } = require('../accessories/otpSender')
 
 
@@ -76,9 +78,10 @@ const userLogin = async (req, res) => {
         return res.status(401).json('Username or Password not match !!!!!!!!!!')
     }
     const genOTP = generateOTP(6);
-
     
-    const otp = await OTP.create({phoneOTP: genOTP, expireAt})
+    const otp = await otpModel.create({
+                                    phoneOTP: genOTP, 
+                                    otp_id: user.id})
     //console.log(otp);
     await user.save()
     //const token = createToken(user._id)
@@ -108,22 +111,22 @@ const verifyOTP = async(req, res, next) => {
                 message: `User Not Found !!!!!!`
             }))
         }
-
-
+    
+        const dbOTP = await otpModel.findOne({otp_id: userid})
+        
+        
         var dates = {
-            convert:function(expireAt) {
-              
+            convert:function(d) {
                 return (
-                    expireAt.constructor === Date ? expireAt :
-                    expireAt.constructor === Array ? new Date(expireAt[0],expireAt[1],expireAt[2]) :
-                    expireAt.constructor === Number ? new Date(expireAt) :
-                    expireAt.constructor === String ? new Date(expireAt) :
-                    typeof expireAt === "object" ? new Date(expireAt.year,expireAt.month,expireAt.date) :
+                    d.constructor === Date ? d :
+                    d.constructor === Array ? new Date(d[0],d[1],d[2]) :
+                    d.constructor === Number ? new Date(d) :
+                    d.constructor === String ? new Date(d) :
+                    typeof d === "object" ? new Date(d.year,d.month,d.date) :
                     NaN
                 );
             },
             compare:function(expireAt,currentTime) {
-        
                 return (
                     isFinite(expireAt=this.convert(expireAt).valueOf()) &&
                     isFinite(currentTime=this.convert(currentTime).valueOf()) ?
@@ -131,10 +134,11 @@ const verifyOTP = async(req, res, next) => {
                     NaN
                 );
             }
-       
+        
         }
-    
-        const dbOTP = await OTP.findOne({_id: user.id})
+        
+        //console.log((new Date));
+        
         // if (OTP !== user.phoneOTP) {
         //     return next(res.status(400).json({
         //         message: `Incorrect OTP !!!!!!`

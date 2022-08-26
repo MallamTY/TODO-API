@@ -3,6 +3,12 @@ const mongoose = require('mongoose');
 
 const schema = mongoose.Schema
 const otpSchema = new schema({
+
+    otp_id: {
+        type: String,
+        required: true
+    },
+    
     phoneOTP: {
         type: String,
          
