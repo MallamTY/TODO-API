@@ -109,22 +109,22 @@ const userLogin = async (req, res) => {
 
 const resendOTP = async (req, res, next) => {
     try {
-        console.log(req.params.id);
         const {id} = req.params
         const now = new Date()
         const expireAt = timeAdder(now, 3)
 
-        const user = await User.findById(id)
-
         const genOTP = generateOTP(6);
-        sendOTP(user.phone, genOTP)
-        await otpModel.create({
-                                phoneOTP: genOTP, 
-                                otp_id: user.id,
-                                expireAt
-                            })
-        await user.save()
+
+        const user = await User.findById(id)
+        await otpModel.findOneAndUpdate({
+                                        otp_id: user.id}, 
+                                        {phoneOTP: genOTP, 
+                                        expireAt: expireAt
+                                    })
         
+        sendOTP(user.phone, genOTP)
+        
+
         res.status(200).json({Message:'Your one time password has been sent to your mobile number........',
                                     username: user.username, 
                                     userid: user._id
