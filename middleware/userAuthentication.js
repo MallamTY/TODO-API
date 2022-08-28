@@ -1,6 +1,6 @@
 const User = require('../Model/userModel')
 const jwt = require('jsonwebtoken')
-const { SECRET, EMAIL_SECRET } = require('../configuration/configuration')
+const { SECRET, EMAIL_SECRET, PASSWORD_RECOVERY_SECRET } = require('../configuration/configuration')
 
 
 
@@ -47,8 +47,19 @@ const userAuthentication = async(req, res, next) => {
      }
  }
 
+ const passwordRecovery = (req, res, next) => {
+     
+        const {id} = jwt.verify(req.params.reset-passkey, PASSWORD_RECOVERY_SECRET)
+        
+        req.user = id
+
+        next()
+  
+ }
+
 module.exports = {
     userAuthentication,
-    emailTokenVerify
+    emailTokenVerify,
+    passwordRecovery
 
 }
