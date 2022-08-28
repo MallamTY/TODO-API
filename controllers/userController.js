@@ -8,7 +8,7 @@ const otpModel = require('../Model/otpModel')
 const { timeAdder } = require('../accessories/timeAdder')
 const { db } = require('../Model/userModel')
 //const otpModel = require('../Model/otpModel')
-//const { sendOTP } = require('../accessories/otpSender')
+const { sendOTP } = require('../accessories/otpSender')
 
 
 const userSignup = async (req, res) => {
@@ -71,7 +71,8 @@ const userLogin = async (req, res) => {
     }
     try {
         const now = new Date()
-        const expireAt = timeAdder(now, 5)
+        const expireAt = timeAdder(now, 3)
+
         const user = await User.findOne({ $or: [ { username }, { email } ] })
 
     if(!user) {
@@ -85,12 +86,12 @@ const userLogin = async (req, res) => {
         return res.status(401).json('Username or Password not match !!!!!!!!!!')
     }
     const genOTP = generateOTP(6);
-    
-    const otp = await otpModel.create({
-                                    phoneOTP: genOTP, 
-                                    otp_id: user.id,
-                                    expireAt
-                                })
+    sendOTP(user.phone, genOTP)
+    await otpModel.create({
+                            phoneOTP: genOTP, 
+                            otp_id: user.id,
+                            expireAt
+                        })
     await user.save()
     res.status(200).json({Message:'Your one time password has been sent to your mobile number........',
                                 username, 
@@ -106,6 +107,36 @@ const userLogin = async (req, res) => {
     
 }
 
+const resendOTP = async (req, res, next) => {
+    try {
+        console.log(req.params.id);
+        const {id} = req.params
+        const now = new Date()
+        const expireAt = timeAdder(now, 3)
+
+        const user = await User.findById(id)
+
+        const genOTP = generateOTP(6);
+        sendOTP(user.phone, genOTP)
+        await otpModel.create({
+                                phoneOTP: genOTP, 
+                                otp_id: user.id,
+                                expireAt
+                            })
+        await user.save()
+        
+        res.status(200).json({Message:'Your one time password has been sent to your mobile number........',
+                                    username: user.username, 
+                                    userid: user._id
+                                })
+        
+    } 
+    catch (error) {
+        res.status(500).json({
+            error: error.message
+        })
+    }
+}
 
 
 const verifyOTP = async(req, res, next) => {
@@ -206,6 +237,7 @@ const verifyOTP = async(req, res, next) => {
 
 module.exports = {
     userSignup,
-    userLogin, 
+    userLogin,
+    resendOTP, 
     verifyOTP
 }
