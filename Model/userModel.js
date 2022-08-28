@@ -39,7 +39,8 @@ const userSchema = new schema({
         type: String,
         maxlength: [50, `Email can't be more than 50 characters`],
         trim: true,
-        required: true
+        required: true,
+        unique: [true, `This phone number is already attached to an account`]
     },
 
     password: {
@@ -54,16 +55,6 @@ const userSchema = new schema({
         minlength: [8, `Confirm password can not be less than 8 characters`],
         required: true,
         
-    },
-
-    isAuthenticated: {
-        type: Boolean,
-        default: false
-    },
-
-    phoneOTP: {
-        type: String,
-        default: ""
     }
 
 }, {timestamps: true}

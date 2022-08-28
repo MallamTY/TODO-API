@@ -5,6 +5,8 @@ const bcrypt = require('bcrypt')
 const {generateOTP}  = require('../accessories/otpGenerator')
 const { createToken } = require('../accessories/tokenGenerator')
 const otpModel = require('../Model/otpModel')
+const { timeAdder } = require('../accessories/timeAdder')
+const { db } = require('../Model/userModel')
 //const otpModel = require('../Model/otpModel')
 //const { sendOTP } = require('../accessories/otpSender')
 
@@ -29,12 +31,15 @@ const userSignup = async (req, res) => {
     }
 
     try {
-        const user = await User.findOne({email})
+        
+        //const user = await User.findOne({email})
+        const user = await User.findOne({$or:[{username}, {email}]})
 
         if (user) {
-             return res.status(401).json('You already have an account !!!!!!!!!!!!!!!')
-        }
-    
+            return res.status(401).json('Username or Email already taken !!!!!!!!!!!!')
+       
+        }       
+        
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
         const hashedconfirmPassword = await bcrypt.hash(confirmpassword, salt)
@@ -52,7 +57,7 @@ const userSignup = async (req, res) => {
             status:'Account successfully created........',
             user: registeredUser})
     } catch (error) {
-        res.status(500).json('Internal error encountered, please try again later !!!!!!!!!!')
+        res.status(500).json(`Internal error encountered while processing your request`)
     }
         
 
@@ -65,6 +70,8 @@ const userLogin = async (req, res) => {
         return res.status(401).json('All fields are required !!!!!!!!!')
     }
     try {
+        const now = new Date()
+        const expireAt = timeAdder(now, 5)
         const user = await User.findOne({ $or: [ { username }, { email } ] })
 
     if(!user) {
@@ -81,10 +88,10 @@ const userLogin = async (req, res) => {
     
     const otp = await otpModel.create({
                                     phoneOTP: genOTP, 
-                                    otp_id: user.id})
-    //console.log(otp);
+                                    otp_id: user.id,
+                                    expireAt
+                                })
     await user.save()
-    //const token = createToken(user._id)
     res.status(200).json({Message:'Your one time password has been sent to your mobile number........',
                                 username, 
                                 userid: user._id
@@ -99,10 +106,11 @@ const userLogin = async (req, res) => {
     
 }
 
-const verifyOTP = async(req, res, next) => {
 
+
+const verifyOTP = async(req, res, next) => {
     try {
-        var currentdate = new Date();
+        var currentDate = new Date();
         const {OTP, userid} = req.body;
 
         const user = await User.findById(userid)
@@ -115,14 +123,15 @@ const verifyOTP = async(req, res, next) => {
         const dbOTP = await otpModel.findOne({otp_id: userid})
         
         
+        
         var dates = {
-            convert:function(d) {
+            convert:function(date) {
                 return (
-                    d.constructor === Date ? d :
-                    d.constructor === Array ? new Date(d[0],d[1],d[2]) :
-                    d.constructor === Number ? new Date(d) :
-                    d.constructor === String ? new Date(d) :
-                    typeof d === "object" ? new Date(d.year,d.month,d.date) :
+                    date.constructor === Date ? date :
+                    date.constructor === Array ? new Date(date[0],date[1],date[2]) :
+                    date.constructor === Number ? new Date(date) :
+                    date.constructor === String ? new Date(date) :
+                    typeof date === "object" ? new Date(date.year,date.month,date.date) :
                     NaN
                 );
             },
@@ -136,32 +145,55 @@ const verifyOTP = async(req, res, next) => {
             }
         
         }
-        
-        //console.log((new Date));
-        
-        // if (OTP !== user.phoneOTP) {
-        //     return next(res.status(400).json({
-        //         message: `Incorrect OTP !!!!!!`
-        //     }))
-        // }
 
-        // user.phoneOTP = ''
-        // user.isAuthenticated = false
-        // const token = createToken(user._id)
+       if (dbOTP != null) {
+            if (dbOTP.isAuthenticated != true) {
 
-        // await user.save()
+                if (dates.compare(dbOTP.expireAt, currentDate) == 1) {
 
-        res.status(200).json({    
-            status: "Success",
-              message: "OTP Accepted !!!!!!!!!!!!!!",
-              data: {
-                userId: user._id,
-                token: token
+                    if (OTP !== dbOTP.phoneOTP) {
+
+                        return next(res.status(400).json({
+                            status: 'one-time-password verification failed !!!!!',
+                            message: 'Invalid one-time-password!!!!!!!!!!'
+                        }))
+                    }
+                    else{  
+
+                        dbOTP.isAuthenticated = true;
+                        dbOTP.save()
+                        const token = createToken(userid)
+
+                        return next(res.status(200).json({
+                            status: 'one-time-password verification successful ..............',
+                            message: 'One-time-password accepted ........',
+                            token
+                            
+                        }))
+                    }
+                }
+                else{
+                    return next(res.status(400).json({
+                        status: 'one-time-password verification failed !!!!!',
+                        message: 'One-time-password expired !!!!!!!!!!'
+                    }))
+                }
+            }
+            else {
+                return next(res.status(400).json({
+                    status: 'one-time-password verification failed !!!!!',
+                    message: 'One-time-password used !!!!!!!!!!'
+                }))
+            }
                 
-              }
-            })
-
-        next()
+        }
+        else {
+            return next(res.status(400).json({
+                status: 'one-time-password verification failed !!!!!!!!!!!',
+                message: 'Invalid one-time-password'
+            }))
+        }
+    
     } catch (error) {
         next(res.status(500).json({
             error: error.message

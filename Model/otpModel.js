@@ -10,11 +10,12 @@ const otpSchema = new schema({
     },
     
     phoneOTP: {
-        type: String,
+        type: String
          
      },
      expireAt: {
-        type: Date  
+        type: Date,
+        required: true 
     },
 
     isAuthenticated: {

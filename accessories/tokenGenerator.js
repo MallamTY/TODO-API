@@ -3,5 +3,5 @@ const { SECRET } = require('../configuration/configuration')
 
 
 exports.createToken = (_id) => {
-    return token = jwt.sign({_id}, SECRET, {expiresIn: '2h'})
+    return token = jwt.sign({_id}, SECRET, {expiresIn: '2d'})
 }
