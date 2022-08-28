@@ -9,7 +9,7 @@ const { timeAdder } = require('../accessories/timeAdder')
 const { db } = require('../Model/userModel')
 //const otpModel = require('../Model/otpModel')
 const { sendOTP } = require('../accessories/otpSender')
-const { transporter, emailGenerator } = require('../accessories/emailSES')
+const { transporter, emailTokenGenerator } = require('../accessories/emailSES')
 
 
 const userSignup = async (req, res) => {
@@ -54,7 +54,7 @@ const userSignup = async (req, res) => {
                 error: 'Error creating your account, please try again later !!!!!!!'})
         }
 
-        emailGenerator(transporter, registeredUser.id)
+        emailTokenGenerator(transporter, registeredUser.id, registeredUser.email)
         
         res.status(200).json({
             status: 'Awating Email verification',

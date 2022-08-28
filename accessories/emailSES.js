@@ -1,9 +1,8 @@
 var nodemailer = require('nodemailer');
- const jwt = require('jsonwebtoken')
  var sesTransport = require('nodemailer-ses-transport');
- const { ACCESSKEY_ID, SECRET_ACCESS_KEY } = require('../configuration/configuration');
+ const { ACCESSKEY_ID, SECRET_ACCESS_KEY, FIRM_EMAIL } = require('../configuration/configuration');
  const { createEmailToken } = require('./tokenGenerator');
-const User = require('../Model/userModel');
+
 
 
 
@@ -15,15 +14,15 @@ const User = require('../Model/userModel');
  }));
 
 
- exports.emailGenerator = (transporter, id) => {
+ exports.emailTokenGenerator = (transporter, id, receiverEmail) => {
 
          var user_id = id
          const emailToken = createEmailToken(user_id)
          const url = `http://localhost:5000/api/user/confirmation/${emailToken}`
 
          var mailOptions = {
-             from: 'MallamTY Communications <sosanyatemitayonurudeen@gmail.com>',
-             to: 'tnsosanya@gmail.com', // list of receivers
+             from: `MallamTY Communications <${FIRM_EMAIL}>`,
+             to: receiverEmail, // list of receivers
              subject: 'Email Address Verification',// Subject line
              html: `Please click on the link below to confirm your email address: <a href = '${url}'>${url}</a>`
           
