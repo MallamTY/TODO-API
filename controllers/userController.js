@@ -89,6 +89,13 @@ const userLogin = async (req, res) => {
 
         return res.status(401).json('Username or Password not match !!!!!!!!!!')
     }
+
+    if(user.confirmedEmail == false) {
+        return res.status(401).json({
+            status: 'Login faled !!!!!!!!!',
+            message: 'Please verify your email address'
+        })
+    }
     const genOTP = generateOTP(6);
     sendOTP(user.phone, genOTP)
     await otpModel.create({
@@ -217,7 +224,7 @@ const verifyOTP = async(req, res, next) => {
             else {
                 return next(res.status(400).json({
                     status: 'one-time-password verification failed !!!!!',
-                    message: 'One-time-password used !!!!!!!!!!'
+                    message: 'Bad request !!!!!!!!!!'
                 }))
             }
                 

@@ -12,7 +12,8 @@ const todoSchema = new schema({
     status: {
         type: String,
         default: 'Uncompleted',
-        trim:true
+        trim:true,
+        required: [true, `The status field can't be empty`]
     },
 
     user_id: {
