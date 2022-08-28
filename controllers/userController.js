@@ -9,6 +9,7 @@ const { timeAdder } = require('../accessories/timeAdder')
 const { db } = require('../Model/userModel')
 //const otpModel = require('../Model/otpModel')
 const { sendOTP } = require('../accessories/otpSender')
+const { transporter, emailGenerator } = require('../accessories/emailSES')
 
 
 const userSignup = async (req, res) => {
@@ -52,17 +53,20 @@ const userSignup = async (req, res) => {
             res.status(401).json({
                 error: 'Error creating your account, please try again later !!!!!!!'})
         }
+
+        emailGenerator(transporter, registeredUser.id)
         
         res.status(200).json({
-            status:'Account successfully created........',
-            user: registeredUser})
+            status: 'Awating Email verification',
+            message:'Check your email for account account verification link........',
+            })
     } catch (error) {
-        res.status(500).json(`Internal error encountered while processing your request`)
+        res.status(500).json({error: error.message})
     }
         
 
 }
-    
+
 
 const userLogin = async (req, res) => {
     const {username, password, email} = req.body

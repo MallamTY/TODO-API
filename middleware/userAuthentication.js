@@ -1,6 +1,6 @@
 const User = require('../Model/userModel')
 const jwt = require('jsonwebtoken')
-const { SECRET } = require('../configuration/configuration')
+const { SECRET, EMAIL_SECRET } = require('../configuration/configuration')
 
 
 
@@ -29,4 +29,26 @@ const userAuthentication = async(req, res, next) => {
     }
 }
 
-module.exports = userAuthentication
+ const emailTokenVerify = async(req, res, next) => {
+     try {
+         const{_id} = jwt.verify(req.params.token, EMAIL_SECRET)
+
+         const user = await User.findOneAndUpdate({_id}, {confirmedEmail: true})
+        
+           return res.status(200).json({
+            status: 'Success ................',
+            message: 'Your Email has been verified, please proceed to login',
+            username: user.username
+
+        })
+
+     } catch (error) {
+         res.status(500).json({error: error.message})
+     }
+ }
+
+module.exports = {
+    userAuthentication,
+    emailTokenVerify
+
+}

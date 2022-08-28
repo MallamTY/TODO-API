@@ -55,6 +55,15 @@ const userSchema = new schema({
         minlength: [8, `Confirm password can not be less than 8 characters`],
         required: true,
         
+    },
+
+    phoneOTP: {
+        type: String
+    },
+
+    confirmedEmail: {
+        type: Boolean,
+        default: false
     }
 
 }, {timestamps: true}
@@ -62,5 +71,6 @@ const userSchema = new schema({
 // userSchema.index({createdAt: 1},{expireAfterSeconds: 20})
 // createdAt: { type: Date, expires: 20, default: Date.now }
 // }
+
 
 module.exports = mongoose.model('User', userSchema)
