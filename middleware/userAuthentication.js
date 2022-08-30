@@ -47,19 +47,10 @@ const userAuthentication = async(req, res, next) => {
      }
  }
 
-//  const passwordRecovery = (req, res, next) => {
-     
-//         const {_id} = jwt.verify(req.params.token, PASSWORD_RECOVERY_SECRET)
-        
-//         req.user = id
 
-//         next()
-  
-//  }
 
 module.exports = {
     userAuthentication,
     emailTokenVerify,
-   // passwordRecovery
 
 }

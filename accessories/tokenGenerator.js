@@ -11,5 +11,7 @@ exports.createEmailToken = (_id) => {
 }
 
 exports.passwordRecoveryToken = (_id, email) => {
+
     return passwordRecoveryToken = jwt.sign({_id, email}, PASSWORD_RECOVERY_SECRET, {expiresIn: '1h'})
+
 }

@@ -13,12 +13,6 @@ const jwt = require('jsonwebtoken')
 
 
 
-
-
-
-
-
-
 const userSignup = async (req, res) => {
     //firstname, lastname,  username, !username || !firstname || !lastname || firstname, lastname, username,
     const {firstname, lastname, username, email,password, confirmpassword, phone} = req.body
@@ -162,6 +156,7 @@ const resendOTP = async (req, res, next) => {
 
 
 const resetPasswordLink = async (req, res, next) => {
+
             const {email} = req.body
             try {
             
@@ -180,7 +175,7 @@ const resetPasswordLink = async (req, res, next) => {
                     message: `You must supply the email attached to your account`
                 })
             }
-
+            
             passwordRecoveryTokenSender(resetTransporter, user.id, email)
 
   
@@ -202,12 +197,14 @@ const resetPasswordLink = async (req, res, next) => {
 
 const resetPassword = async(req, res) => {
     try {
-        const {_id, email} = jwt.verify(req.params.token, PASSWORD_RECOVERY_SECRET)
+    
+           const {_id, email} = jwt.verify(req.params.token, PASSWORD_RECOVERY_SECRET)
         console.log(_id, email);
         
         const {password, confirmpassword} = req.body
 
         if (!_id) {
+        
             return res.status(401).json({
                 status: 'Operation Unsuccesful !!!!!!!!!!!',
                 message: `Invalida Token !!!!!!!!`
@@ -232,6 +229,7 @@ const resetPassword = async(req, res) => {
         const hashedconfirmPassword = await bcrypt.hash(confirmpassword, salt)
 
         const user = await User.findByIdAndUpdate({_id: _id}, {password: hashedPassword, confirmpassword: hashedconfirmPassword})
+
         
         return res.status(200).json({
             status: `Password Reset Successful .............`,
