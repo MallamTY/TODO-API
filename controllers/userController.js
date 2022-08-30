@@ -9,7 +9,7 @@ const { timeAdder } = require('../accessories/timeAdder')
 const { db } = require('../Model/userModel')
 //const otpModel = require('../Model/otpModel')
 const { sendOTP } = require('../accessories/otpSender')
-const { transporter, emailTokenGenerator } = require('../accessories/emailSES')
+const { transporter, emailTokenGenerator, emailTokenSender } = require('../accessories/emailSES')
 
 
 const userSignup = async (req, res) => {
@@ -150,6 +150,82 @@ const resendOTP = async (req, res, next) => {
 }
 
 
+const resetPasswordLink = async (req, res, next) => {
+
+            const {email} = req.body
+            try {
+            
+            if(!email) {
+                return res.status(401).json({
+                    status: 'Failed',
+                    message: `You must supply the email attached to your account`
+                })
+            }
+
+            const user = await User.findOne({email})
+
+            if(!user){
+                return res.status(401).json({
+                    status: 'Failed',
+                    message: `You must supply the email attached to your account`
+                })
+            }
+
+            emailTokenSender(user.id, email)
+            
+            return res.status(200).json({
+                status: 'Successful ...........',
+                message: `Password rest link has been sent to ${email}`
+            })
+
+
+        } catch (error) {
+            res.status(500).json({
+                error: error.message
+            })
+        }
+    }
+
+
+const resetPassword = async(req, res) => {
+    try {
+        const {id} = req.user
+        const {password, confirmpassword} = req.body
+
+        if (!id) {
+            return res.status(401).json({
+                status: 'Operation Unsuccesful !!!!!!!!!!!',
+                message: `Invalida Token !!!!!!!!`
+            })
+        }
+
+        if (!validator.isStrongPassword(password)) {
+            return res.status(401).json('Strong password is required')
+        }
+
+        if (!validator.isStrongPassword(confirmpassword)) {
+            return res.status(401).json('Strong password is required')
+        }
+
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password)
+        const hashedconfirmPassword = await bcrypt.hash(confirmpassword)
+
+        const user = await User.findByIdAndUpdate({_id: id}, {password: hashedPassword, confirmpassword: hashedconfirmPassword})
+        
+        return res.status(200).json({
+            status: `Password Reset Successful .............`,
+            message: `You have successfully reset your password .........`
+        })
+    } catch (error) {
+        res.status(500).json({
+            error: error.message
+        })
+    }
+}
+
+
+
 const verifyOTP = async(req, res, next) => {
     try {
         var currentDate = new Date();
@@ -250,5 +326,7 @@ module.exports = {
     userSignup,
     userLogin,
     resendOTP, 
-    verifyOTP
+    verifyOTP,
+    resetPasswordLink,
+    resetPassword
 }
