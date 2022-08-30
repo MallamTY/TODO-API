@@ -39,30 +39,40 @@ var nodemailer = require('nodemailer');
   
  }
 
- 
- exports.passwordRecoveryTokenGenerator = (transporter, id, receiverEmail) => {
 
-          
-          const passwordRecoveryToken =  passwordRecoveryToken(id)
-          const url = `http://localhost:5000/api/user/reset-passkey/${passwordRecoveryToken}`
 
-          var mailOptions = {
-              from: `MallamTY Communications <${FIRM_EMAIL}>`,
-              to: receiverEmail, // list of receivers
-              subject: 'Password Recovery Link',// Subject line
-              html: `Please click on this link to reset your password: <a href = '${url}'>${url}</a>`
-          
-            };
-        
-          
-          transporter.sendMail(mailOptions, function(error, info) {
-            if (error) {
-              console.log(error);
-            } else {
-              console.log(`Email verification link successfully sent ..........`);
-            }
-          });
+
+
+ exports.resetTransporter = nodemailer.createTransport(sesTransport({
+   accessKeyId: ACCESSKEY_ID,
+   secretAccessKey: SECRET_ACCESS_KEY,
+   rateLimit: 5
+ }));
+
+
+
+exports.passwordRecoveryTokenSender = (resetTransporter, id, receiverEmail) => {
+
+          //
+    const passwordRecoveryTokenn =  passwordRecoveryToken(id, receiverEmail)
+    
+    const url = `http://localhost:5000/api/user/reset-passkey/${passwordRecoveryTokenn}`
+
+    var mailOptions = {
+        from: `MallamTY Communications <${FIRM_EMAIL}>`,
+        to: receiverEmail, // list of receivers
+        subject: 'Password Recovery Link',// Subject line
+        html: `Please click on this link to reset your password: <a href = '${url}'>${url}</a>`
+    
+      };
+  
+    resetTransporter.sendMail(mailOptions, function(error, info) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log(`Email verification link successfully sent ..........`);
+        }
+      });
 
 }
 
- //emailGenerator(transporter)

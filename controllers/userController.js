@@ -1,15 +1,16 @@
 const User = require('../Model/userModel')
-//const OTP = require('../Model/otpModel')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
 const {generateOTP}  = require('../accessories/otpGenerator')
 const { createToken } = require('../accessories/tokenGenerator')
 const otpModel = require('../Model/otpModel')
 const { timeAdder } = require('../accessories/timeAdder')
-const { db } = require('../Model/userModel')
-//const otpModel = require('../Model/otpModel')
 const { sendOTP } = require('../accessories/otpSender')
-const { transporter, emailTokenGenerator, emailTokenSender } = require('../accessories/emailSES')
+const { transporter, emailTokenSender, passwordRecoveryTokenSender, resetTransporter } = require('../accessories/emailSES')
+const { PASSWORD_RECOVERY_SECRET } = require('../configuration/configuration')
+const jwt = require('jsonwebtoken')
+
+
 
 
 const userSignup = async (req, res) => {
@@ -29,6 +30,10 @@ const userSignup = async (req, res) => {
 
     if (!validator.isStrongPassword(confirmpassword)) {
         return res.status(401).json('Strong password is required')
+    }
+
+    if (password != confirmpassword) {
+        return res.status(401).json('password not match')
     }
 
     try {
@@ -54,7 +59,7 @@ const userSignup = async (req, res) => {
                 error: 'Error creating your account, please try again later !!!!!!!'})
         }
 
-        emailTokenGenerator(transporter, registeredUser.id, registeredUser.email)
+        emailTokenSender(transporter, registeredUser.id, registeredUser.email)
         
         res.status(200).json({
             status: 'Awating Email verification',
@@ -170,8 +175,8 @@ const resetPasswordLink = async (req, res, next) => {
                     message: `You must supply the email attached to your account`
                 })
             }
-
-            emailTokenSender(user.id, email)
+            
+            passwordRecoveryTokenSender(resetTransporter, user.id, email)
             
             return res.status(200).json({
                 status: 'Successful ...........',
@@ -189,10 +194,14 @@ const resetPasswordLink = async (req, res, next) => {
 
 const resetPassword = async(req, res) => {
     try {
-        const {id} = req.user
+    
+           const {_id, email} = jwt.verify(req.params.token, PASSWORD_RECOVERY_SECRET)
+        console.log(_id, email);
+        
         const {password, confirmpassword} = req.body
 
-        if (!id) {
+        if (!_id) {
+        
             return res.status(401).json({
                 status: 'Operation Unsuccesful !!!!!!!!!!!',
                 message: `Invalida Token !!!!!!!!`
@@ -207,11 +216,17 @@ const resetPassword = async(req, res) => {
             return res.status(401).json('Strong password is required')
         }
 
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password)
-        const hashedconfirmPassword = await bcrypt.hash(confirmpassword)
+        if (password != confirmpassword) {
+            return res.status(401).json('password not match')
+        }
 
-        const user = await User.findByIdAndUpdate({_id: id}, {password: hashedPassword, confirmpassword: hashedconfirmPassword})
+
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
+        const hashedconfirmPassword = await bcrypt.hash(confirmpassword, salt)
+
+        const user = await User.findByIdAndUpdate({_id: _id}, {password: hashedPassword, confirmpassword: hashedconfirmPassword})
+
         
         return res.status(200).json({
             status: `Password Reset Successful .............`,
