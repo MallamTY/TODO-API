@@ -7,13 +7,13 @@ var nodemailer = require('nodemailer');
 
 
 
- exports.transporter = nodemailer.createTransport(sesTransport({
+ exports.resetTransporter = nodemailer.createTransport(sesTransport({
    accessKeyId: ACCESSKEY_ID,
    secretAccessKey: SECRET_ACCESS_KEY,
    rateLimit: 5
  }));
 
-exports.passwordRecoveryTokenSender = (transporter, id, receiverEmail) => {
+exports.passwordRecoveryTokenSender = (resetTransporter, id, receiverEmail) => {
 
           //
     const passwordRecoveryTokenn =  passwordRecoveryToken(id)
@@ -28,7 +28,7 @@ exports.passwordRecoveryTokenSender = (transporter, id, receiverEmail) => {
     
       };
   
-    transporter.sendMail(mailOptions, function(error, info) {
+    resetTransporter.sendMail(mailOptions, function(error, info) {
         if (error) {
           console.log(error);
         } else {

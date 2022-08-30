@@ -10,7 +10,7 @@ const { db } = require('../Model/userModel')
 //const otpModel = require('../Model/otpModel')
 const { sendOTP } = require('../accessories/otpSender')
 const { transporter, emailTokenSender } = require('../accessories/emailSES')
-const { passwordRecoveryTokenSender } = require('../accessories/forgetEmailSender')
+const { passwordRecoveryTokenSender, resetTransporter } = require('../accessories/forgetEmailSender')
 
 
 const userSignup = async (req, res) => {
@@ -172,7 +172,7 @@ const resetPasswordLink = async (req, res, next) => {
                 })
             }
 
-            passwordRecoveryTokenSender(user.id, email)
+            passwordRecoveryTokenSender(resetTransporter, user.id, email)
             
             return res.status(200).json({
                 status: 'Successful ...........',
