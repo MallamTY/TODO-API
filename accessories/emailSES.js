@@ -2,6 +2,7 @@ var nodemailer = require('nodemailer');
  var sesTransport = require('nodemailer-ses-transport');
  const { ACCESSKEY_ID, SECRET_ACCESS_KEY, FIRM_EMAIL } = require('../configuration/configuration');
  const { createEmailToken, passwordRecoveryToken } = require('./tokenGenerator');
+ const User = require('../Model/userModel')
 
 
 
@@ -33,11 +34,13 @@ var nodemailer = require('nodemailer');
            if (error) {
              console.log(error);
            } else {
-             console.log(`Email verification link successfully sent ..........`);
+             console.log(`Email verifciation link sent to ${receiverEmail}`)
            }
          });
   
  }
+
+
 
 
 
@@ -64,11 +67,15 @@ exports.passwordRecoveryTokenSender = (resetTransporter, id, receiverEmail) => {
     
       };
   
-    resetTransporter.sendMail(mailOptions, function(error, info) {
+    resetTransporter.sendMail(mailOptions, async function(error, info) {
         if (error) {
           console.log(error);
         } else {
-          console.log(`Email verification link successfully sent ..........`);
+          const user = await User.findOneAndUpdate({email: receiverEmail},
+            {password: "", 
+            confirmpassword: ""
+            })
+            console.log(user.email);
         }
       });
 

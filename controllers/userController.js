@@ -182,11 +182,14 @@ const resetPasswordLink = async (req, res, next) => {
             }
 
             passwordRecoveryTokenSender(resetTransporter, user.id, email)
+
+  
+                return res.status(200).json({
+                    status: 'Successful ...........',
+                    message: `Password rest link has been sent to ${email}`
+                })
             
-            return res.status(200).json({
-                status: 'Successful ...........',
-                message: `Password rest link has been sent to ${email}`
-            })
+           
 
 
         } catch (error) {
