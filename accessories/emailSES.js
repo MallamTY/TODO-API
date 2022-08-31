@@ -52,7 +52,7 @@ var nodemailer = require('nodemailer');
 
 
 
-exports.passwordRecoveryTokenSender = (resetTransporter, _id, recoverySecrete, receiverEmail, username) => {
+exports.passwordRecoveryTokenSender = (resetTransporter, _id, recoverySecrete, receiverEmail) => {
 
           //
     const passwordRecoveryTokenn =  passwordRecoveryToken(receiverEmail, recoverySecrete)
@@ -60,21 +60,25 @@ exports.passwordRecoveryTokenSender = (resetTransporter, _id, recoverySecrete, r
     const url = `http://localhost:5000/api/user/reset-passkey/${_id}/${passwordRecoveryTokenn}`
     console.log(url);
 
-    // var mailOptions = {
-    //     from: `MallamTY Communications <${FIRM_EMAIL}>`,
-    //     to: receiverEmail, // list of receivers
-    //     subject: 'Password Recovery Link',// Subject line
-    //     html: `Please click on this link to reset your password: <a href = '${url}'>${url}</a>`
+     var mailOptions = {
+         from: `MallamTY Communications <${FIRM_EMAIL}>`,
+         to: receiverEmail, // list of receivers
+         subject: 'Password Recovery Link',// Subject line
+         html: `Please click on this link to reset your password: <a href = '${url}'>${url}</a>`
     
-    //   };
+       };
   
-    // resetTransporter.sendMail(mailOptions, async function(error, info) {
-    //     if (error) {
-    //       console.log(error);
-    //     } else {
-    //       console.log(`Password reset link successfully sent to your ${receiverEmail}`)
-    //     }
-    //   })
+     resetTransporter.sendMail(mailOptions, async function(error, info) {
+         if (error) {
+           console.log(error);
+         } else {
+           const user = await User.findOneAndUpdate({email: receiverEmail}, {
+                                                    password: "",
+                                                    confirmpassword: ""
+                                                 })
+                                          
+         }
+       })
 
 }
 

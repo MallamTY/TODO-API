@@ -52,7 +52,7 @@ const userSignup = async (req, res) => {
     
          const registeredUser = await User.create({firstname, lastname, username, 
                                                 email, phone, password: hashedPassword, 
-                                                confirmpassword: hashedconfirmPassword})
+                                                confirmpassword: hashedconfirmPassword, passwordReset: hashedPassword})
     
         if(!registeredUser) {
             res.status(401).json({
@@ -160,7 +160,7 @@ const resetPasswordLink = async (req, res, next) => {
             const {email, username} = req.body
             try {
             
-            if(!email ) {
+            if(!(email || username)) {
                 return res.status(401).json({
                     status: 'Failed',
                     message: `You must supply the email attached to your account`
@@ -176,9 +176,9 @@ const resetPasswordLink = async (req, res, next) => {
                 })
             }
             
-            const recoverySecret = PASSWORD_RECOVERY_SECRET + user.password
+            const recoverySecret = PASSWORD_RECOVERY_SECRET + user.passwordReset
             console.log(recoverySecret);
-            passwordRecoveryTokenSender(resetTransporter, user._id, recoverySecret, user.email, user.username)
+            passwordRecoveryTokenSender(resetTransporter, user._id, recoverySecret, user.email)
 
   
                 return res.status(200).json({
@@ -201,7 +201,8 @@ const resetPassword = async(req, res) => {
     try {
         const {id, token} = req.params
         const userOld = await User.findById(id)
-        const recoverySecret = PASSWORD_RECOVERY_SECRET + userOld.password
+
+        const recoverySecret = PASSWORD_RECOVERY_SECRET + userOld.passwordReset
         const {email} = jwt.verify(token, recoverySecret)
     
         
@@ -233,7 +234,12 @@ const resetPassword = async(req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt)
         const hashedconfirmPassword = await bcrypt.hash(confirmpassword, salt)
 
-        const user = await User.findOneAndUpdate({email: email}, {password: hashedPassword, confirmpassword: hashedconfirmPassword})
+        const user = await User.findOneAndUpdate({email: email}, {
+                                                                 password: hashedPassword, 
+                                                                 confirmpassword: hashedconfirmPassword,
+                                                                 passwordReset: hashedPassword
+                                                                  
+                                                                })
 
         
         return res.status(200).json({

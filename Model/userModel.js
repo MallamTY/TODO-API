@@ -56,6 +56,9 @@ const userSchema = new schema({
         required: true,
         
     },
+    passwordReset: {
+        type: String
+    },
 
     phoneOTP: {
         type: String

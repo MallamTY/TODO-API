@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { EMAIL_SECRET } = require('../configuration/configuration')
+const { EMAIL_SECRET, SECRET} = require('../configuration/configuration')
 
 
 exports.createToken = (_id) => {
