@@ -157,17 +157,17 @@ const resendOTP = async (req, res, next) => {
 
 const resetPasswordLink = async (req, res, next) => {
 
-            const {email} = req.body
+            const {email, username} = req.body
             try {
             
-            if(!email) {
+            if(!email ) {
                 return res.status(401).json({
                     status: 'Failed',
                     message: `You must supply the email attached to your account`
                 })
             }
 
-            const user = await User.findOne({email})
+            const user = await User.findOne({$or: [{email},{username}]})
 
             if(!user){
                 return res.status(401).json({
@@ -176,12 +176,14 @@ const resetPasswordLink = async (req, res, next) => {
                 })
             }
             
-            passwordRecoveryTokenSender(resetTransporter, user.id, email)
+            const recoverySecret = PASSWORD_RECOVERY_SECRET + user.password
+            console.log(recoverySecret);
+            passwordRecoveryTokenSender(resetTransporter, user._id, recoverySecret, user.email, user.username)
 
   
                 return res.status(200).json({
                     status: 'Successful ...........',
-                    message: `Password rest link has been sent to ${email}`
+                    message: `Password rest link has been sent to ${user.email}`
                 })
             
            
@@ -197,13 +199,16 @@ const resetPasswordLink = async (req, res, next) => {
 
 const resetPassword = async(req, res) => {
     try {
+        const {id, token} = req.params
+        const userOld = await User.findById(id)
+        const recoverySecret = PASSWORD_RECOVERY_SECRET + userOld.password
+        const {email} = jwt.verify(token, recoverySecret)
     
-           const {_id, email} = jwt.verify(req.params.token, PASSWORD_RECOVERY_SECRET)
-        console.log(_id, email);
+        
         
         const {password, confirmpassword} = req.body
 
-        if (!_id) {
+        if (!email) {
         
             return res.status(401).json({
                 status: 'Operation Unsuccesful !!!!!!!!!!!',
@@ -228,7 +233,7 @@ const resetPassword = async(req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt)
         const hashedconfirmPassword = await bcrypt.hash(confirmpassword, salt)
 
-        const user = await User.findByIdAndUpdate({_id: _id}, {password: hashedPassword, confirmpassword: hashedconfirmPassword})
+        const user = await User.findOneAndUpdate({email: email}, {password: hashedPassword, confirmpassword: hashedconfirmPassword})
 
         
         return res.status(200).json({
