@@ -17,7 +17,7 @@ router.get('/confirmation/:token', emailTokenVerify)
 
 router.post('/forget-password', resetPasswordLink)
 
-router.post('/reset-passkey/:token', resetPassword)
+router.post('/reset-passkey/:id/:token', resetPassword)
 
 
 
